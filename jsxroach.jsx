@@ -78,7 +78,7 @@ final class View {
 	function start() : void {
 		dom.window.setInterval(function() : void {
 			this.update();
-		}, 10);
+		}, 0);
 	}
 
 	function update() : void {
