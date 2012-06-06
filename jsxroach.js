@@ -188,7 +188,7 @@ View.prototype.start$ = function () {
 	var $this = this;
 	dom.window.setInterval((function () {
 		$this.update$();
-	}), 50);
+	}), 10);
 };
 
 /**
