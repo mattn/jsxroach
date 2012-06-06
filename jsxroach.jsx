@@ -66,6 +66,7 @@ final class View {
 			}
 		};
 		for (var i = 0; i < 24; i++) {
+			this.images[i] = null;
 			var image = dom.createElement("img") as HTMLImageElement;
 			var index = ("00" + (i * 15) as string).slice(-3);
 			image.addEventListener("load", loaded);

@@ -173,6 +173,7 @@ View.prototype.init$ = function () {
 		}
 	});
 	for (i = 0; i < 24; i++) {
+		this.images[i] = null;
 		image = (function (o) { return o instanceof HTMLImageElement ? o : null; })(dom$createElement$S("img"));
 		index = ("00" + (i * 15 + "")).slice(- 3);
 		image.addEventListener("load", loaded);
