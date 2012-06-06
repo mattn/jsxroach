@@ -1,0 +1,38 @@
+<html>
+  <head>
+    <title>JSXRoach</title>
+    <style>
+      body {
+        background-color: #222;
+        overflow: hidden;
+      }
+
+      #night-sky {
+        position: absolute;
+        top: 0;
+        left: 0;
+        background-color: #000;
+      }
+      #fps {
+        position: absolute;
+        top: 0;
+        left: 10px;
+        padding: 0;
+        margin: 0;
+        font-size: 20px;
+        color: #fff;
+      }
+    </style>
+    <script src="jsxroach.js"></script>
+    <script>
+      window.addEventListener("load", function(e) {
+		JSX.require("jsxroach.jsx").Application.main$SN("jsxroach", 20);
+      });
+    </script>
+  </head>
+  <body>
+  <div>
+    <canvas id="jsxroach" width="400" height="400"></canvas>
+  </div>
+  </body>
+</html>
