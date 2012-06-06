@@ -16,8 +16,8 @@ final class Roach {
 		if (this.d >= 360) this.d = 0;
 		if (this.d < 0) this.d = 359;
 		var a = this.d * 2 * 3.141592 / 360.0;
-		this.x += Math.cos(a);
-		this.y -= Math.sin(a);
+		this.x += Math.cos(a) * 3;
+		this.y -= Math.sin(a) * 3;
 		if (this.x < 0) this.x = view.width - 1;
 		if (this.y < 0) this.y = view.height - 1;
 		if (this.x >= view.width) this.x = 0;

@@ -86,8 +86,8 @@ Roach.prototype.move$LView$ = function (view) {
 		this.d = 359;
 	}
 	a = this.d * 2 * 3.141592 / 360.0;
-	this.x += Math.cos(a);
-	this.y -= Math.sin(a);
+	this.x += Math.cos(a) * 3;
+	this.y -= Math.sin(a) * 3;
 	if (this.x < 0) {
 		this.x = view.width - 1;
 	}
