@@ -12,16 +12,23 @@ final class Roach {
 	}
 
 	function move(view : View) : void {
-		this.d += Math.floor(3*Math.random()) - 1;
-		if (this.d > 23) this.d = 0;
-		if (this.d < 0) this.d = 23;
-		var a : number = this.d * 24 * 2 * 3.141592 / 360.0;
-		this.x += Math.cos(this.d);
-		this.y += Math.sin(this.d);
+		this.d += (Math.random() * 3) as int - 1;
+		if (this.d >= 360) this.d = 0;
+		if (this.d < 0) this.d = 359;
+		var a = this.d * 2 * 3.141592 / 360.0;
+		this.x += Math.cos(a);
+		this.y -= Math.sin(a);
+		if (this.x < 0) this.x = view.width - 1;
+		if (this.y < 0) this.y = view.height - 1;
+		if (this.x >= view.width) this.x = 0;
+		if (this.y >= view.height) this.y = 0;
 	}
 
 	function render(view : View) : void {
-		view.canvas.drawImage(view.images[this.d], this.x, this.y);
+		view.context.drawImage(
+			view.images[((this.d * 24 / 360) as int)],
+			(this.x - 12) as int,
+			(this.y - 12) as int);
 	}
 }
 
@@ -29,54 +36,56 @@ final class View {
 	var width : number;
 	var height : number;
 	var count : number;
-	var canvas : CanvasRenderingContext2D;
+	var context : CanvasRenderingContext2D;
 	var roaches = [] : Roach[];
 	var images = [] : HTMLCanvasElement[];
 
 	function constructor(canvas : HTMLCanvasElement, count : number) {
-		this.canvas = canvas.getContext("2d") as CanvasRenderingContext2D;
+		this.context = canvas.getContext("2d") as CanvasRenderingContext2D;
 		this.width = canvas.width;
 		this.height = canvas.height;
 		this.count = count;
 	}
 
 	function init() : void {
-		for (var n = 0; n < this.count; n++) {
-			this.roaches[n] = new Roach(
-				Math.floor(Math.random() * this.width),
-				Math.floor(Math.random() * this.height),
-				Math.floor(Math.random() * 24));
+		for (var i = 0; i < this.count; i++) {
+			this.roaches[i] = new Roach(
+				(Math.random() * this.width) as int,
+				(Math.random() * this.height) as int,
+				(Math.random() * 360) as int);
 		}
 		var count = 0;
 		var loaded = function(e : Event) : void {
 			var image = e.target as HTMLImageElement;
 			var canvas = dom.createElement("canvas") as HTMLCanvasElement;
-			var cx = canvas.getContext("2d") as CanvasRenderingContext2D;
-			cx.drawImage(image, 0, 0);
+			var context = canvas.getContext("2d") as CanvasRenderingContext2D;
+			context.drawImage(image, 0, 0);
 			this.images[image.dataset["name"] as int] = canvas;
 			if(++count == this.images.length) {
 				this.start();
 			}
 		};
-		for (var n = 0; n < 24; n++) {
+		for (var i = 0; i < 24; i++) {
 			var image = dom.createElement("img") as HTMLImageElement;
-			var index = ("00" + (n * 15) as string).slice(-3);
+			var index = ("00" + (i * 15) as string).slice(-3);
 			image.addEventListener("load", loaded);
-			image.src = "roach" + index + ".gif";
-			image.dataset["name"] = n as string;
+			image.src = "img/roach" + index + ".gif";
+			image.dataset["name"] = i as string;
 		}
 	}
 
 	function start() : void {
 		dom.window.setInterval(function() : void {
 			this.update();
-		}, 0);
+		}, 50);
 	}
 
 	function update() : void {
-		for (var n : number = 0; n < this.roaches.length; n++) {
-			this.roaches[n].move(this);
-			this.roaches[n].render(this);
+		this.context.fillStyle = "rgb(255, 255, 255)";
+		this.context.fillRect(0, 0, this.width, this.height);
+		for (var i = 0; i < this.roaches.length; i++) {
+			this.roaches[i].move(this);
+			this.roaches[i].render(this);
 		}
 	}
 }
