@@ -12,9 +12,19 @@ final class Roach {
 	}
 
 	function move(view : View) : void {
-		this.d += (Math.random() * 3) as int - 1;
+		this.d += (Math.random() * 7) as int - 3;
 		if (this.d >= 360) this.d = 0;
 		if (this.d < 0) this.d = 359;
+
+		var dx = view.mousePoint[0] - this.x;
+		var dy = view.mousePoint[1] - this.y;
+		var dr = Math.sqrt(dx * dx + dy * dy);
+		if (dr < 100) {
+			var er = Math.atan2(dy, dx) * 360.0 / 2 / 3.141592;
+			if (er < 0) er += 180;
+			this.d += er < this.d ? -7 : 7;
+		}
+
 		var a = this.d * 2 * 3.141592 / 360.0;
 		this.x += Math.cos(a) * 3;
 		this.y -= Math.sin(a) * 3;
@@ -39,6 +49,7 @@ final class View {
 	var context : CanvasRenderingContext2D;
 	var roaches = [] : Roach[];
 	var images = [] : HTMLCanvasElement[];
+	var mousePoint = [0, 0] : number[];
 
 	function constructor(canvas : HTMLCanvasElement, count : number) {
 		this.context = canvas.getContext("2d") as CanvasRenderingContext2D;
@@ -73,6 +84,30 @@ final class View {
 			image.src = "img/roach" + index + ".gif";
 			image.dataset["name"] = i as string;
 		}
+
+		var touchMove = function(e : Event) : void {
+			e.preventDefault();
+			this.mousePoint = this.getPoint(e);
+		};
+		var body = dom.window.document.body;
+		body.addEventListener("mousemove", touchMove);
+		body.addEventListener("touchmove", touchMove);
+	}
+
+	function getPoint(e : Event/*UIEvent*/) : number[] {
+		var px = 0;
+		var py = 0;
+		if(e instanceof MouseEvent) {
+			var me = e as MouseEvent;
+			px = me.clientX;
+			py = me.clientY;
+		}
+		else if(e instanceof TouchEvent) {
+			var te = e as TouchEvent;
+			px = te.touches[0].pageX;
+			py = te.touches[0].pageY;
+		}
+		return [ px, py ];
 	}
 
 	function start() : void {

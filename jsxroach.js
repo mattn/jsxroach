@@ -77,13 +77,31 @@ Roach$NNN.prototype = new Roach;
  */
 Roach.prototype.move$LView$ = function (view) {
 	/** @type {!number} */
+	var dx;
+	/** @type {!number} */
+	var dy;
+	/** @type {!number} */
+	var dr;
+	/** @type {!number} */
+	var er;
+	/** @type {!number} */
 	var a;
-	this.d += (Math.random() * 3 | 0) - 1;
+	this.d += (Math.random() * 7 | 0) - 3;
 	if (this.d >= 360) {
 		this.d = 0;
 	}
 	if (this.d < 0) {
 		this.d = 359;
+	}
+	dx = view.mousePoint[0] - this.x;
+	dy = view.mousePoint[1] - this.y;
+	dr = Math.sqrt(dx * dx + dy * dy);
+	if (dr < 100) {
+		er = Math.atan2(dy, dx) * 360.0 / 2 / 3.141592;
+		if (er < 0) {
+			er += 180;
+		}
+		this.d += (er < this.d ? - 7 : 7);
 	}
 	a = this.d * 2 * 3.141592 / 360.0;
 	this.x += Math.cos(a) * 3;
@@ -109,7 +127,7 @@ Roach.prototype.render$LView$ = function (view) {
 	view.context.drawImage((function (v) {
 		if (! (typeof v !== "undefined")) {
 			debugger;
-			throw new Error("[jsxroach.jsx:29] detected misuse of 'undefined' as type 'HTMLCanvasElement'");
+			throw new Error("[jsxroach.jsx:39] detected misuse of 'undefined' as type 'HTMLCanvasElement'");
 		}
 		return v;
 	}(view.images[this.d * 24 / 360 | 0])), this.x - 12 | 0, this.y - 12 | 0);
@@ -131,6 +149,7 @@ View.prototype = new Object;
 function View$LHTMLCanvasElement$N(canvas, count) {
 	this.roaches = [  ];
 	this.images = [  ];
+	this.mousePoint = [ 0, 0 ];
 	this.context = (function (o) { return o instanceof CanvasRenderingContext2D ? o : null; })(canvas.getContext("2d"));
 	this.width = canvas.width;
 	this.height = canvas.height;
@@ -152,6 +171,9 @@ View.prototype.init$ = function () {
 	var image;
 	/** @type {!string} */
 	var index;
+	var touchMove;
+	/** @type {HTMLElement} */
+	var body;
 	for (i = 0; i < this.count; i++) {
 		this.roaches[i] = new Roach$NNN(Math.random() * this.width | 0, Math.random() * this.height | 0, Math.random() * 360 | 0);
 	}
@@ -167,7 +189,7 @@ View.prototype.init$ = function () {
 		canvas = (function (o) { return o instanceof HTMLCanvasElement ? o : null; })(dom$createElement$S("canvas"));
 		context = (function (o) { return o instanceof CanvasRenderingContext2D ? o : null; })(canvas.getContext("2d"));
 		context.drawImage(image, 0, 0);
-		$this.images[image.dataset["name"] | 0] = canvas;
+		$this.images[image.dataset.name | 0] = canvas;
 		if (++ count === $this.images.length) {
 			$this.start$();
 		}
@@ -178,8 +200,44 @@ View.prototype.init$ = function () {
 		index = ("00" + (i * 15 + "")).slice(- 3);
 		image.addEventListener("load", loaded);
 		image.src = "img/roach" + index + ".gif";
-		image.dataset["name"] = i + "";
+		image.dataset.name = i + "";
 	}
+	touchMove = (function (e) {
+		e.preventDefault();
+		$this.mousePoint = $this.getPoint$LEvent$(e);
+	});
+	body = dom.window.document.body;
+	body.addEventListener("mousemove", touchMove);
+	body.addEventListener("touchmove", touchMove);
+};
+
+/**
+ * @param {Event} e
+ * @return {Array.<undefined|!number>}
+ */
+View.prototype.getPoint$LEvent$ = function (e) {
+	/** @type {!number} */
+	var px;
+	/** @type {!number} */
+	var py;
+	/** @type {MouseEvent} */
+	var me;
+	/** @type {TouchEvent} */
+	var te;
+	px = 0;
+	py = 0;
+	if (e instanceof MouseEvent) {
+		me = (function (o) { return o instanceof MouseEvent ? o : null; })(e);
+		px = me.clientX;
+		py = me.clientY;
+	} else {
+		if (e instanceof TouchEvent) {
+			te = (function (o) { return o instanceof TouchEvent ? o : null; })(e);
+			px = te.touches[0].pageX;
+			py = te.touches[0].pageY;
+		}
+	}
+	return [ px, py ];
 };
 
 /**
@@ -305,7 +363,7 @@ function js$() {
 js$.prototype = new js;
 
 $__jsx_lazy_init(dom, "window", function () {
-	return js.global["window"];
+	return js.global.window;
 });
 js.global = (function () { return this; })();
 
