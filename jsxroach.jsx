@@ -4,6 +4,7 @@ final class Roach {
 	var x : number;
 	var y : number;
 	var d : number;
+	var s : boolean;
 
 	function constructor(x : number, y : number, d : number) {
 		this.x = x;
@@ -12,6 +13,7 @@ final class Roach {
 	}
 
 	function move(view : View) : void {
+		if (this.s) return;
 		this.d += (Math.random() * 7) as int - 3;
 		if (this.d >= 360) this.d = 0;
 		if (this.d < 0) this.d = 359;
@@ -35,10 +37,29 @@ final class Roach {
 	}
 
 	function render(view : View) : void {
-		view.context.drawImage(
-			view.images[((this.d * 24 / 360) as int)],
-			(this.x - 12) as int,
-			(this.y - 12) as int);
+		if (this.s) {
+			view.context.drawImage(
+				view.images[24],
+				(this.x - 12) as int,
+				(this.y - 12) as int);
+		} else {
+			view.context.drawImage(
+				view.images[((this.d * 24 / 360) as int)],
+				(this.x - 12) as int,
+				(this.y - 12) as int);
+		}
+	}
+
+	function hit(point : number[]) : boolean {
+		if (this.s) return false;
+		var dx = point[0] - this.x;
+		var dy = point[1] - this.y;
+		var dr = Math.sqrt(dx * dx + dy * dy);
+		if (dr < 50) {
+			this.s = true;
+			return true;
+		}
+		return false;
 	}
 }
 
@@ -49,6 +70,7 @@ final class View {
 	var context : CanvasRenderingContext2D;
 	var roaches = [] : Roach[];
 	var images = [] : HTMLCanvasElement[];
+	var deadImage : HTMLCanvasElement;
 	var mousePoint = [0, 0] : number[];
 
 	function constructor(canvas : HTMLCanvasElement, count : number) {
@@ -76,7 +98,7 @@ final class View {
 				this.start();
 			}
 		};
-		for (var i = 0; i < 24; i++) {
+		for (var i = 0; i < 25; i++) {
 			this.images[i] = null;
 			var image = dom.createElement("img") as HTMLImageElement;
 			var index = ("00" + (i * 15) as string).slice(-3);
@@ -92,6 +114,20 @@ final class View {
 		var body = dom.window.document.body;
 		body.addEventListener("mousemove", touchMove);
 		body.addEventListener("touchmove", touchMove);
+
+		var touchStart = function(e : Event) : void {
+			e.preventDefault();
+			var p = this.getPoint(e);
+			for (var i = 0; i < this.roaches.length; i++) {
+				if (this.roaches[i].hit(p)) {
+					if (--count == 0) {
+						// game over;
+					}
+				}
+			}
+		};
+		body.addEventListener("mousedown",  touchStart);
+		body.addEventListener("touchstart", touchStart);
 	}
 
 	function getPoint(e : Event/*UIEvent*/) : number[] {
